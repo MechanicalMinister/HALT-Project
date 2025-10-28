@@ -1,0 +1,83 @@
+# CAD File formats - Large binary files
+*.stp
+*.step
+*.iges
+*.igs
+*.stl
+*.x_t
+*.x_b
+*.prt
+*.asm
+*.dwg
+*.dxf
+*.catpart
+*.catproduct
+*.ipt
+*.iam
+*.sldprt
+*.sldasm
+*.slddrw
+*.3dm
+*.sat
+*.model
+*.exp
+*.session
+
+# FEM Analysis files - Large result files
+*.rst
+*.rth
+*.rmg
+*.rfl
+*.db
+*.full
+*.esav
+*.emat
+*.ostp
+*.mntr
+*.pvtu
+*.vtu
+*.h5
+*.xdmf
+*.frd
+*.dat
+*.res
+*.out
+*.log
+*.cae
+*.jnl
+*.rec
+*.sim
+*.odb
+*.prt
+*.lck
+*.023
+*.pac
+*.stt
+
+# Temporary and backup files
+*~
+*.bak
+*.tmp
+*.temp
+*.cache
+*.swp
+*.swo
+*.DS_Store
+Thumbs.db
+
+# Compiled Python files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# IDE and editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Keep important result summaries (uncomment these)
+# !*_summary.txt
+# !*_results.pdf
+# !*_report.pdf
