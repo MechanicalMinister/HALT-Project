@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.16">
+  <POU Name="MAIN" Id="{c3f32fe6-24ca-47d3-9123-508e9c4b7732}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+    (* Kanal 1 fra EL3202 *)
+    aiTempCh1 AT %I* : INT;   // Rå værdi (0.1 °C)
+
+    (* Temperatur i grader *)
+    rTempCh1 : REAL;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(* Konvertering til °C *)
+rTempCh1 := INT_TO_REAL(aiTempCh1) * 0.1;]]></ST>
+    </Implementation>
+    <LineIds Name="MAIN">
+      <LineId Id="49" Count="0" />
+      <LineId Id="11" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
