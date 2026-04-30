@@ -5,7 +5,7 @@ step = 2;                          % Increment
 numFiles = 9;                      % How many files to load
 cutoff = 0;                    % Cutoff for cycle range in meters
 %seal_l = 0.004;                   % Length of the seal used
-Bin_edges = linspace(0, 0.1, 500); % Edge specifications for histogram bins
+Bin_edges = linspace(0, 0.3, 1000); % Edge specifications for histogram bins
 fields = {'CylPos1', 'CylPos2', 'CylPos3'};   % field names as strings
 
 for k = 1:numFiles
@@ -71,14 +71,33 @@ end
 figure
 tiledlayout(3,3)
 
-%Loop of histogram figures
-for i = 1:3
+%Loop of raw position data figures
+for i = 1:9
     nexttile
-    histogram(compiled_ranges{i*4-3}, Bin_edges)
+    plot(Data(1).OutData.time, Data(i).OutData.CylPos1)
+    hold on
+    plot(Data(1).OutData.time, Data(i).OutData.CylPos2)
+    hold on
+    plot(Data(1).OutData.time, Data(i).OutData.CylPos3)
+    legend('Cyl1', 'Cyl2', 'Cyl3')
+    xlabel('Time since measurement start [s]')
+    ylabel('Position of cylinders [m]')
+    ylim([0.13 0.55])
+    title(sprintf('Dataset %d', i*2+1))
+end
+
+figure
+tiledlayout(3,3)
+
+%Loop of histogram figures
+for i = 1:9
+    nexttile
+    histogram(compiled_ranges{i}, Bin_edges)
     yscale('log')
     xlabel('Cylinder movement range [m]')
     ylabel('No. of occurences')
-    title(sprintf('Mean wind speed of %d m/s', i*8-5))
+    title(sprintf('Dataset %d', i*2+1))
+    ylim([0.6 10000])
 end
 
 %% Mean velocity check
@@ -133,4 +152,3 @@ for k = 1:numFiles % loop over different datasets
         end
     end
 end
-
