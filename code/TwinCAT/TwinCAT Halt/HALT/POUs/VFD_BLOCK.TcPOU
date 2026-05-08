@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.16">
+  <POU Name="VFD_BLOCK" Id="{5b4f732b-053d-43ef-a928-f3159fb8d357}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK VFD_BLOCK
+VAR_INPUT
+	rPositionMeasurment : REAL;
+	rVfdPositionReference : REAL; 
+	rSet AT %I* : REAL;
+END_VAR
+VAR_OUTPUT
+	bOnOffVfd1ControlRelaySeven				AT %Q* : BOOL; // This is the on/off variable for the seventh relay in the system, which is used to turn on and off the VFD 1
+	bReverseVfd1ControlRelayEight			AT %Q* : BOOL; // This is the change‑direction variable for the eighth relay in the system, which is used to set the direction of the VFD 1
+	bOnOffVfd3ControlRelayTen				AT %Q* : BOOL; // This is the on/off variable for the tenth relay in the system, which is used to turn on and off the VFD 2
+	aiThe10VoltagesSignalForTheSpeedReferenceControlToTheVfD1 AT %Q* : INT;
+	
+END_VAR
+VAR
+	bEnable : BOOL;
+
+END_VAR
+VAR_TEMP
+	fScale : REAL;
+END_VAR
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[bEnable := TRUE;
+
+IF bEnable THEN
+
+   (* Clamp setpoint *)
+   IF rSet > 100.0 THEN
+      rSet := 100.0;
+   ELSIF rSet < 0.0 THEN
+      rSet := 0.0;
+   END_IF;
+
+   (* Scale output *)
+   fScale := rSet / 100.0;
+   aiThe10VoltagesSignalForTheSpeedReferenceControlToTheVfD1 := REAL_TO_INT(fScale * 32767.0);
+
+
+ELSE
+
+   aiThe10VoltagesSignalForTheSpeedReferenceControlToTheVfD1 := 0;
+
+END_IF;
+]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

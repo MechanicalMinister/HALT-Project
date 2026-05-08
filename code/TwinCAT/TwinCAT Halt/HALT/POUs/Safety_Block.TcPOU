@@ -1,0 +1,103 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.16">
+  <POU Name="Safety_Block" Id="{a3766ba5-7f8c-4fb4-8cea-ff986adeb15f}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK Safety_Block
+VAR_INPUT
+    //--- Limit‑switch signals ---------------------------------
+    bLimitSwitchRight   AT %I* : BOOL;   // right‑hand limit switch
+    bLimitSwitchLeft    AT %I* : BOOL;   // left‑hand limit switch
+    bSafetyDetectionRelay AT %I* : BOOL; // safety relay detection
+    bHmiActivationBottom AT %I* : BOOL;  // HMI activation button
+
+    //--- Measured values (passed as inputs) --------------------
+    rTemperature1       : REAL;           // temperature port 1
+    rTemperature2       : REAL;           // temperature port 2
+    rPressure1          : REAL;           // pressure port 1
+    rPressure2          : REAL;           // pressure port 2
+    rPosition           : REAL;           // position
+    rForce              : REAL;           // force
+	
+	STOP 				: BOOL; // 
+
+    //--- Limit definitions ------------------------------------
+    stTemperatureLimit1 : stLimit := (rMinimumValue:=0.0, rMaxiumValue:=120.0, bValueMustBe:=FALSE);
+    stTemperatureLimit2 : stLimit := (rMinimumValue:=0.0, rMaxiumValue:=120.0, bValueMustBe:=FALSE);
+    stPressureLimit1    : stLimit := (rMinimumValue:=95.0,  rMaxiumValue:=110.0, bValueMustBe:=FALSE);
+    stPressureLimit2    : stLimit := (rMinimumValue:=95.0,  rMaxiumValue:=110.0, bValueMustBe:=FALSE);
+    stPositionLimit     : stLimit := (rMinimumValue:=0.0,   rMaxiumValue:=1000.0, bValueMustBe:=FALSE);
+    stForceLimit        : stLimit := (rMinimumValue:=0.0,   rMaxiumValue:=1000.0, bValueMustBe:=FALSE);
+    stSafetyLimit       : stLimit := (rMinimumValue:=0.0,   rMaxiumValue:=0.0,   bValueMustBe:=TRUE);   // must be TRUE
+END_VAR
+
+VAR_OUTPUT
+    bAllOk               AT %Q* : BOOL;          // all limits satisfied
+    bSafetyCircuitRelayThree AT %Q* : BOOL := FALSE;      // third safety relay
+    bSafetyCircuitRelayFour  AT %Q* : BOOL := FALSE;      // fourth safety relay
+	bSystemIsUpAndRuning AT %Q* : BOOL; // 
+END_VAR
+
+VAR
+    //--- Results of individual checks -------------------------
+    bOkTemperature1      : BOOL;
+    bOkTemperature2      : BOOL;
+    bOkPressure1         : BOOL;
+    bOkPressure2         : BOOL;
+    bOkPosition          : BOOL;
+    bOkForce             : BOOL;
+    bOkLimitSwitchRight  : BOOL;
+    bOkLimitSwitchLeft   : BOOL;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Temperature checks
+bOkTemperature1 := FCheckVariabel(rTemperature1, stTemperatureLimit1);
+bOkTemperature2 := FCheckVariabel(rTemperature2, stTemperatureLimit2);
+
+// Pressure checks
+bOkPressure1 := FCheckVariabel(rPressure1, stPressureLimit1);
+bOkPressure2 := FCheckVariabel(rPressure2, stPressureLimit2);
+
+// Position check
+bOkPosition := FCheckVariabel(rPosition, stPositionLimit);
+
+// Force check
+bOkForce := FCheckVariabel(rForce, stForceLimit);
+
+// Limit‑switch checks (BOOL → REAL, because FCheckVariabel expects REAL)
+bOkLimitSwitchRight := FCheckVariabel(BOOL_TO_REAL(bLimitSwitchRight), stSafetyLimit);
+bOkLimitSwitchLeft  := FCheckVariabel(BOOL_TO_REAL(bLimitSwitchLeft),  stSafetyLimit);
+
+// Overall OK status – every single check must be TRUE
+bAllOk := bOkTemperature1
+	   AND bOkTemperature2
+//	   AND bOkPressure1
+//	   AND bOkPressure2
+	   AND bOkPosition
+	   AND bOkForce
+	   AND bOkLimitSwitchRight
+	   AND bOkLimitSwitchLeft
+	   AND bHmiActivationBottom;
+
+
+IF NOT STOP THEN 
+	bSystemIsUpAndRuning := FALSE;
+	bSafetyCircuitRelayThree := FALSE;
+	bSafetyCircuitRelayFour  := FALSE;
+ELSE
+	// Activate the safety relays only when all limits are satisfied
+	IF bAllOk THEN
+		bSafetyCircuitRelayThree := TRUE;
+		bSafetyCircuitRelayFour  := TRUE;
+	ELSE
+		bSafetyCircuitRelayThree := FALSE;
+		bSafetyCircuitRelayFour  := FALSE;
+	END_IF
+
+	IF bAllOk AND bSafetyDetectionRelay THEN 
+		bSystemIsUpAndRuning := TRUE;
+	ELSE
+		bSystemIsUpAndRuning := FALSE;
+	END_IF
+END_IF]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

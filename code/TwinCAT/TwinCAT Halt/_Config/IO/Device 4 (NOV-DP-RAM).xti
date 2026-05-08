@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<TcSmItem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.74" ClassName="CDevDpRamDef" SubType="121">
+	<Device Id="4" DevType="121">
+		<Name>__FILENAME__</Name>
+		<AddressInfo>
+			<Isa>
+				<Address>-267386880</Address>
+				<Size>131072</Size>
+			</Isa>
+		</AddressInfo>
+		<Vars VarGrpType="1" InsertType="1">
+			<Name>Inputs</Name>
+		</Vars>
+		<Vars VarGrpType="2" InsertType="1">
+			<Name>Outputs</Name>
+		</Vars>
+		<Image Id="4" ImageFlags="#x00000042" AddrType="12" ImageType="5">
+			<Name>Image</Name>
+		</Image>
+		<DpRam/>
+	</Device>
+</TcSmItem>

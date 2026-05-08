@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.16">
+  <POU Name="FCheckVariabel" Id="{84e52deb-73ca-4c57-bcc7-fdf50fc1eac3}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION FCheckVariabel :BOOL
+VAR_INPUT
+    rValue   : REAL;      // The accuel value (can also be a BOOL, that the bool is either 0/1)
+    stLimit   : stLimit;    // limit ‑ definition for this variable
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// If it is a BOOL, we ignore min / max and only look at bValueMustBe
+IF (stLimit.rMinimumValue = 0.0) AND (stLimit.rMaxiumValue = 0.0) THEN
+	FCheckVariabel := (rValue <> 0.0) = stLimit.bValueMustBe;   // value <> 0.0 = TRUE hvis BOOL er TRUE
+ELSE
+	// otherwise it is a REAL that must be within min / max
+	FCheckVariabel := (rValue >= stLimit.rMinimumValue) AND (rValue <= stLimit.rMaxiumValue );
+END_IF;]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

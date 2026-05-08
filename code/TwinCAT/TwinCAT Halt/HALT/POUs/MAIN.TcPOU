@@ -3,19 +3,102 @@
   <POU Name="MAIN" Id="{c3f32fe6-24ca-47d3-9123-508e9c4b7732}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM MAIN
 VAR
-    (* Kanal 1 fra EL3202 *)
-    aiTempCh1 AT %I* : INT;   // Rå værdi (0.1 °C)
+	// Measurabel Variabels 
+    iTemperatureMeasurementPort1   AT %I* : INT;   // temperature port 1
+    iTemperatureMeasurementPort2   AT %I* : INT;   // temperature port 2
+    iPerssureMeasurementPort1  AT %I* : INT;   // pressure port 1
+    iPerssureMeasurementPort2  AT %I* : INT;   // pressure port 2
+    iPositionMeasurment     AT %I* : INT;   // position
+    iForceMeasurement   AT %I* : DINT;   // force
+	
+	// Readable Variabels
+    rTemperatureReadable1 : REAL;   // temperature port 1
+    rTemperatureReadable2 : REAL;   // temperature port 2
+    rPerssureReadable1 : REAL;   // pressure port 1
+    rPerssureReadable2 : REAL;   // pressure port 2
+    rPositionReadable : REAL;   // position
+    rForceReadable : REAL;   // force
+	
+	// Relay Variabels: // 
+	// bSafetyCircuitRelayThree				    AT %Q* : BOOL; // This is the on/off variable for the third relay in the system, which can break the safety circuit
+	// bSafetyCircuitRelayFour					AT %Q* : BOOL; // This is the on/off variable for the fourth relay in the system, which can break the safety circuit
+	// bHpuValveControlRelayFive				AT %Q* : BOOL; // This is the on/off variable for the fifth relay in the system, which is used to turn on and off the HPU valve
+	// bPneumaticBreakValveControlRelaySix		AT %Q* : BOOL; // This is the on/off variable for the sixth relay in the system, which is used to turn on and off the pneumatic break valve
+	// bOnOffVfd1ControlRelaySeven				AT %Q* : BOOL; // This is the on/off variable for the seventh relay in the system, which is used to turn on and off the VFD 1
+	// bReverseVfd1ControlRelayEight			AT %Q* : BOOL; // This is the change‑direction variable for the eighth relay in the system, which is used to set the direction of the VFD 1
 
-    (* Temperatur i grader *)
-    rTempCh1 : REAL;
+	// System Variabels: //
+	// Time - DT - Data and time  
+	// OperationalSystemValue - BOOL - This is a indicating value to indicate if the system is operational or not
+	
+	// Measuuerbal Parameteres: // 
+	// iTemperatureMeasurementPort1 AT %I* : INT;
+	// iTemperatureMeasurementPort2 AT %I* : INT;
+	// PerssureMeasurementPort1 - INT - 
+	// PerssureMeasurementPort2 - INT - 
+	// ForceMeasurement - INT - 
+	// iPositionMeasurment AT %I* : INT; 
+	// iVelocityMeasurment AT %I* : INT ; 
+
+	
+	// LimitSwitch Variabels: // 
+	// LimitSwitchRight - BOOL - 
+	// LimitSwitchLeft - BOOL - 
+	
+	// VFD Variabels: // 
+	// VfdOn - BOOL - 
+	// VfdOff - BOOL - 
+	// VfdClockwiseRotation - BOOL - 
+	// VfdCounterClockwiseRotation - BOOL - 
+	// VfdPositionReference - INT - 
+	// VfdSpeedReference - INT - 
+	
+	// Set Parameters: //
+	iTestMode AT %I* : INT;
+	rLongStrockDistanceSet  AT %I* : REAL; 
+	rLongStrockVelocitySet  AT %I* : REAL; 
+	rMicroStrockAngularSpeedSet AT %I* : REAL; 
+	rOilTemperatureSet AT %I* : REAL; 
+	rOilPressureSet AT %I* : REAL; 
+	
+	bSTOP AT %I* : BOOL := TRUE; 
+	
+	fbSafetyBlock : Safety_Block;
+	fbVfdBlock : VFD_BLOCK;
+	fbHpuBlock : HPU_BLOCK;
 END_VAR]]></Declaration>
     <Implementation>
-      <ST><![CDATA[(* Konvertering til °C *)
-rTempCh1 := INT_TO_REAL(aiTempCh1) * 0.1;]]></ST>
+      <ST><![CDATA[// Make and scale the data readable
+rTemperatureReadable1 := INT_TO_REAL(iTemperatureMeasurementPort1) / 10;
+rTemperatureReadable2 := INT_TO_REAL(iTemperatureMeasurementPort1) / 10;
+rPerssureReadable1 := INT_TO_REAL(iPerssureMeasurementPort1) / 32768.0 * 400.0;
+rPerssureReadable2 := INT_TO_REAL(iPerssureMeasurementPort2) / 32768.0 * 400.0;
+rPositionReadable := (INT_TO_REAL(iPositionMeasurment) / 32768) * 1000;
+rForceReadable := DINT_TO_REAL(iForceMeasurement);
+
+
+// Pass measured values to the safety block
+fbSafetyBlock.rTemperature1 := rTemperatureReadable1;
+fbSafetyBlock.rTemperature2 := rTemperatureReadable2;
+fbSafetyBlock.rPressure1    := rPerssureReadable1 ;
+fbSafetyBlock.rPressure2    := rPerssureReadable1 ;
+fbSafetyBlock.rPosition     := rPositionReadable;
+fbSafetyBlock.rForce        := rForceReadable;
+fbSafetyBlock.STOP          := bSTOP;
+
+// Execute the safety block
+fbSafetyBlock();
+
+fbVfdBlock();
+fbHpuBlock();
+
+// 2004 1 1 = R3
+// 2004 1 2 = R4
+// 2004 1 3 = R6 
+// 2004 1 4 = R5
+// 2004 2 1 = R7
+// 2004 2 2 = R8
+// 2004 2 4 = R9  ]]></ST>
     </Implementation>
-    <LineIds Name="MAIN">
-      <LineId Id="49" Count="0" />
-      <LineId Id="11" Count="0" />
-    </LineIds>
   </POU>
 </TcPlcObject>
